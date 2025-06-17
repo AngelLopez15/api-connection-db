@@ -27,6 +27,8 @@
     "@nestjs/platform-express": "^11.0.1",
     "@nestjs/typeorm": "^11.0.0",
     "audit": "^0.0.6",
+    "class-transformer": "^0.5.1",
+    "class-validator": "^0.14.2",
     "fix": "^0.0.6",
     "npm": "^11.4.2",
     "pg": "^8.16.0",
