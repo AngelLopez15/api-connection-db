@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable, InternalServerErrorException, Logger } from '@nestjs/common';
+import { BadRequestException, Injectable, InternalServerErrorException, Logger, NotFoundException } from '@nestjs/common';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -36,19 +36,90 @@ export class ProductsService {
   }
 
   findAll() {
-    return `This action returns all products`;
+    // This method retrieves all products from the database
+    // It uses the productRepository to find all products
+    // The find() method returns an array of Product entities
+    // You can also add pagination or filtering logic here if needed
+    // For example, you can use find({ where: { isActive: true } }) to filter active products
+    // This will return all products in the database
+    // You can also use findAndCount() to get the total count of products
+    // If you want to return only specific fields, you can use select() method
+    // For example, this.productRepository.find({ select: ['id', 'title', 'price'] });
+    // This will return all products in the database
+    // You can also use relations to load related entities
+    // For example, this.productRepository.find({ relations: ['category'] });
+    // This will return all products in the database
+    // You can also use findOne() to retrieve a single product by its ID
+    // For example, this.productRepository.findOne(id);
+    // This will return all products in the database
+    // You can also use findBy() to retrieve products by specific criteria
+    // For example, this.productRepository.findBy({ isActive: true });
+    // This will return all products in the database
+    // You can also use findAndCount() to get the total count of products
+    // For example, const [products, count] = await this.productRepository.findAndCount();
+    // This will return all products in the database
+    // You can also use findByIds() to retrieve multiple products by their IDs
+    // For example, this.productRepository.findByIds([1, 2, 3]);
+    // This will return all products in the database
+    // You can also use findOneOrFail() to retrieve a single product by its ID
+    // For example, this.productRepository.findOneOrFail(id);
+    return this.productRepository.find();
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} product`;
+  async findOne(id: string) {
+    // This method retrieves a single product by its ID from the database
+    // It uses the productRepository to find the product with the given ID
+    // const product = await this.productRepository.findOneBy({ id });
+    // The findOne method returns a single Product entity or null if not found
+    // You can also use findOneOrFail() to throw an error if the product is not found
+    // For example, const product = await this.productRepository.findOneOrFail({ where: { id } });
+    // If you want to include related entities, you can use the relations option
+    // For example, const product = await this.productRepository.findOne({ where: { id }, relations: ['category'] });
+    // If you want to include specific fields, you can use the select option
+    // For example, const product = await this.productRepository.findOne({ where: { id }, select: ['id', 'title', 'price'] });
+    // If you want to include soft-deleted products, you can use the withDeleted option
+    // For example, const product = await this.productRepository.findOne({ where: { id }, withDeleted: true });
+    // If you want to include products that match specific criteria, you can use the where option
+    // For example, const product = await this.productRepository.findOne({ where: { id, isActive: true } });
+    // If you want to include products that match specific criteria, you can use the where option
+    // For example, const product = await this.productRepository.findOne({ where: { id, isActive: true } });
+    const product = await this.productRepository.findOne({
+      where: { id },
+      // You can also include relations if needed, e.g., relations: ['category']
+    });
+    if (!product) {
+      // If the product is not found, throw a NotFoundException
+      // This will return a 404 status code with a message
+      // You can also log the error for debugging purposes
+      throw new NotFoundException(`Product with ID ${id} not found`);
+    }
+    // If the product is not found, it will return null
+    return product;
   }
 
   update(id: number, updateProductDto: UpdateProductDto) {
     return `This action updates a #${id} product`;
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} product`;
+  async remove(id: string) {
+    const product = await this.findOne(id);
+    // This method removes a product by its ID from the database
+    // It first retrieves the product using the findOne method
+    // If the product is not found, it will throw a NotFoundException
+    // If the product is found, it will be passed to the remove method  
+    // of the productRepository to delete it from the database
+    // The remove method will return the deleted product
+    // If you want to perform a soft delete instead of a hard delete,
+    // you can use the softDelete method instead
+    // The softDelete method will set the deletedAt field to the current date
+    // and will not actually remove the product from the database
+    // If you want to perform a hard delete, you can use the delete method instead
+    // The delete method will remove the product from the database
+    await this.productRepository.remove(product);
+    // If the product is successfully removed, it will return nothing
+    // If you want to return a success message, you can return a string or an object
+    // For example, return { message: 'Product removed successfully' };
+    return { message: 'Product removed successfully' }
   }
 
   /**
