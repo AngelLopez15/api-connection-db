@@ -4,6 +4,7 @@ import { UpdateProductDto } from './dto/update-product.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Product } from './entities/product.entity';
 import { Repository } from 'typeorm';
+import { PaginationDto } from 'src/common/dto/pagination.dto';
 
 @Injectable()
 export class ProductsService {
@@ -35,9 +36,15 @@ export class ProductsService {
     }
   }
 
-  findAll() {
+  findAll(paginationDto: PaginationDto) {
     // This method retrieves all products from the database
     // It uses the productRepository to find all products
+
+    const {
+      limit = 3,
+      offset = 0,
+    } = paginationDto;
+
     // The find() method returns an array of Product entities
     // You can also add pagination or filtering logic here if needed
     // For example, you can use find({ where: { isActive: true } }) to filter active products
@@ -63,7 +70,13 @@ export class ProductsService {
     // This will return all products in the database
     // You can also use findOneOrFail() to retrieve a single product by its ID
     // For example, this.productRepository.findOneOrFail(id);
-    return this.productRepository.find();
+    return this.productRepository.find({
+      take: limit, // Limit the number of products returned
+      skip: offset, // Skip the specified number of products for pagination
+      // You can also include relations if needed, e.g., relations: ['category']
+      // If you want to select specific fields, you can use the select option
+      // For example, select: ['id', 'title', 'price']
+    });
   }
 
   async findOne(id: string) {
