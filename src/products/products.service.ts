@@ -79,7 +79,7 @@ export class ProductsService {
     });
   }
 
-  async findOne(id: string) {
+  async findOne(param: string) {
     // This method retrieves a single product by its ID from the database
     // It uses the productRepository to find the product with the given ID
     // const product = await this.productRepository.findOneBy({ id });
@@ -96,22 +96,71 @@ export class ProductsService {
     // For example, const product = await this.productRepository.findOne({ where: { id, isActive: true } });
     // If you want to include products that match specific criteria, you can use the where option
     // For example, const product = await this.productRepository.findOne({ where: { id, isActive: true } });
-    const product = await this.productRepository.findOne({
-      where: { id },
+    // const product = await this.productRepository.findOne({
+    //   where: { id },
       // You can also include relations if needed, e.g., relations: ['category']
-    });
-    if (!product) {
+    // });
+    // if (!product) {
       // If the product is not found, throw a NotFoundException
       // This will return a 404 status code with a message
       // You can also log the error for debugging purposes
-      throw new NotFoundException(`Product with ID ${id} not found`);
-    }
+    //   throw new NotFoundException(`Product with ID ${id} not found`);
+    // }
     // If the product is not found, it will return null
+    // return product;
+
+    let product: Product | null;
+    // Check if the param is a valid UUID
+    if (param.length === 36) {
+      // If the param is a valid UUID, find the product by ID
+      product = await this.productRepository.findOne({
+        where: { id: param },
+      });
+    } else { 
+      // If the param is not a valid UUID, find the product by slug
+      // product = await this.productRepository.findOne({
+      //   where: { slug: param },
+      // });
+
+      const query = this.productRepository.createQueryBuilder('product')
+      // Use a query builder to find the product by slug or title
+      // Use the LOWER function to make the search case-insensitive
+      // Use the 'orWhere' method to search by both slug and title
+      // This will return the first product that matches either condition
+      product = await query
+        .where('LOWER(product.slug) = LOWER(:slug)', { slug: param.toLowerCase() })
+        .orWhere('LOWER(product.title) = LOWER(:title)', { title: param.toLowerCase() })
+        .getOne();
+    }
+    // If the product is not found, throw a NotFoundException
+    if (!product) {
+      throw new NotFoundException(`Product with param "${param}" not found`);
+    }
+    // If the product is found, return it
     return product;
   }
 
-  update(id: number, updateProductDto: UpdateProductDto) {
-    return `This action updates a #${id} product`;
+  async update(id: string, updateProductDto: UpdateProductDto) {
+    // This method updates a product by its ID in the database
+    const product = await this.productRepository.preload({
+      id, // The ID of the product to update
+      ...updateProductDto, // The updated data from the DTO
+    });
+    // The preload method will create a new product instance with the updated data
+    // If the product is not found, it will return null
+    if (!product) {
+      // If the product is not found, throw a NotFoundException
+      throw new NotFoundException(`Product with ID ${id} not found`);
+    }
+    // If the product is found, save the updated product to the database
+    try {
+      // The save method will update the product in the database
+      // If the product is not found, it will throw an error
+      return await this.productRepository.save(product);
+    } catch (error) {
+      // If an error occurs during the update, handle it
+      this.handleErrorException(error);
+    }
   }
 
   async remove(id: string) {

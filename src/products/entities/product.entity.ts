@@ -46,6 +46,12 @@ export class Product {
 
   @Column('text')
   gender: string;
+
+  @Column('text', {
+    array: true,
+    default: [],
+  })
+  tags: string[];
   
   @BeforeInsert()
   // This method is called before inserting a new product into the database.
@@ -65,6 +71,18 @@ export class Product {
       // This ensures that the slug is URL-friendly and consistent.
       // This is useful for SEO and user-friendly URLs.
       // This will ensure that the slug is always in a consistent format.
+      this.slug = this.slug.toLowerCase().replace(/ /g, '_').replace(/[^a-z0-9_]/g, '');
+    }
+  }
+
+  @BeforeInsert()
+  // This method is called before inserting a new product into the database.
+  checkSlugUpdate() {
+    // This method is similar to checkSlug, but it is specifically for updating the slug.
+    // It ensures that the slug is always in a consistent format when the product is updated.
+    if (!this.slug) {
+      this.slug = this.title.toLowerCase().replace(/ /g, '_').replace(/[^a-z0-9_]/g, '');
+    } else {
       this.slug = this.slug.toLowerCase().replace(/ /g, '_').replace(/[^a-z0-9_]/g, '');
     }
   }
