@@ -5,6 +5,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Product } from './entities/product.entity';
 import { Repository } from 'typeorm';
 import { PaginationDto } from 'src/common/dto/pagination.dto';
+import { ProductImage } from './entities/product-image.entity';
 
 @Injectable()
 export class ProductsService {
@@ -14,14 +15,22 @@ export class ProductsService {
     // You can inject other services or repositories here if needed
     @InjectRepository(Product) // This is just an example, adjust as necessary
     private readonly productRepository: Repository<Product>, // Injecting the Product repository to interact with the database
+
+    @InjectRepository(ProductImage)
+    private readonly productImageRepository: Repository<ProductImage>, // Injecting the ProductImage repository to interact with the database
   ) {}
 
   async create(createProductDto: CreateProductDto) {
     try {
+      const {images = [], ...productDetails} = createProductDto;
+
       // Validate the DTO before creating the product
       // This is where you can add any additional validation logic if needed
       // Create a new product instance using the provided DTO
-      const product = this.productRepository.create(createProductDto);
+      const product = this.productRepository.create({
+        ...productDetails,
+        images: images.map(image => this.productImageRepository.create({ url: image })),
+      });
       // Save the product to the database
       // This will automatically handle the insertion and return the saved product
       await this.productRepository.save(product);
@@ -145,6 +154,7 @@ export class ProductsService {
     const product = await this.productRepository.preload({
       id, // The ID of the product to update
       ...updateProductDto, // The updated data from the DTO
+      images: [],
     });
     // The preload method will create a new product instance with the updated data
     // If the product is not found, it will return null

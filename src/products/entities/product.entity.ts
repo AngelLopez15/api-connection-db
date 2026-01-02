@@ -1,4 +1,5 @@
-import { BeforeInsert, Column, Entity, PrimaryGeneratedColumn } from "typeorm";
+import { BeforeInsert, Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
+import { ProductImage } from "./product-image.entity";
 // This entity represents a product in the system.
 // It can be extended with properties like name, price, description, etc.
 @Entity()
@@ -52,6 +53,17 @@ export class Product {
     default: [],
   })
   tags: string[];
+
+  @OneToMany(() => ProductImage, (productImage) => productImage.product, {
+    // This establishes a one-to-many relationship with the ProductImage entity.
+    // eager: true,
+    // Eager loading means that when a product is fetched, its associated images are also fetched automatically.
+    // This is useful for ensuring that product images are always available when retrieving product data.
+    // The 'cascade' option allows for operations like insert, update, and remove to be cascaded to the related images.
+    // This means that if a product is deleted, its associated images will also be deleted.
+    cascade: true,
+  })
+  images?: ProductImage[];
   
   @BeforeInsert()
   // This method is called before inserting a new product into the database.
